@@ -6,8 +6,8 @@ global {
 
     // 1. File paths
 
-    file buildings_file <- file("/Users/krittin/Gama_Workspace/test chula1/includes/fangyai_buildings.shp");
-    file roads_file <- file("/Users/krittin/Gama_Workspace/test chula1/includes/fangyai_roads.shp");
+    shape_file buildings_file <- shape_file("../includes/fangyai_buildings.shp");
+    shape_file roads_file <- shape_file("../includes/fangyai_roads.shp");
 
     geometry shape <- envelope(roads_file);
 
@@ -30,7 +30,10 @@ global {
         create building from: buildings_file;
 
         // Load roads
-        create road from: roads_file;
+        // Split roads at intersections and keep only the connected part,
+        // otherwise students on isolated pieces can't reach their target
+        list<geometry> clean_lines <- clean_network(roads_file.contents, 1.0, true, true);
+        create road from: clean_lines;
 
         // Create pedestrian network
         road_network <- as_edge_graph(road);
@@ -65,8 +68,8 @@ species building {
     aspect default {
 
         draw shape
-            color: "#D8D2C5"
-            border: "#A49E92";
+            color: rgb("#D8D2C5")
+            border: rgb("#A49E92");
     }
 }
 
